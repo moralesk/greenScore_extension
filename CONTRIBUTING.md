@@ -21,7 +21,7 @@ Our system missed an AI-powered site or incorrectly identified the AI model
 You know a website uses renewable energy but we show it as standard hosting
 
 ### 📊 **Unusual Environmental Impact**
-A site has significantly different environmental impact than our calculations suggest
+A site has significantly different CO2 or water usage than our calculations suggest
 
 ## How to Contribute
 

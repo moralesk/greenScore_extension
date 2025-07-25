@@ -15,6 +15,7 @@ GreenScore automatically calculates the environmental footprint of websites you 
 ### 📊 **Smart Scoring**
 - **Letter grades (A+ to F)** for quick environmental assessment
 - **Detailed breakdowns** showing base website vs. AI processing impact
+- **CO2 and water usage tracking** for complete environmental picture
 - **Color-coded indicators** for immediate visual feedback
 - **Contextual tooltips** with calculation methodology
 
@@ -54,9 +55,10 @@ GreenScore automatically calculates the environmental footprint of websites you 
 
 ### **What We Calculate**
 - **CO2 emissions per visit** based on data transfer and energy usage
+- **Water usage per visit** for data center cooling and processing
 - **Page size impact** measured in real-time
 - **Green hosting bonus** for renewable energy-powered websites
-- **AI processing overhead** with model-specific multipliers
+- **AI processing overhead** with model-specific multipliers for both CO2 and water
 
 ### **Data Sources**
 - **[Green Web Foundation API](https://www.thegreenwebfoundation.org/)** - Renewable energy hosting verification
@@ -95,12 +97,17 @@ Base Score (0-100):
 - 10-20g CO2: 40-59 (D)
 - >20g CO2: 0-39 (F)
 
-AI Multipliers:
+AI Multipliers (CO2 & Water):
 - ChatGPT/GPT-4: 3.5x
 - Gemini: 3.2x  
 - Claude: 3.0x
 - GitHub Copilot: 1.8x
 - Notion AI: 1.6x
+
+Water Usage Factors:
+- Base: 1.8L per kWh
+- AI Processing: 2.5x multiplier (cooling)
+- Green Hosting: 30% reduction
 
 Green Hosting Bonus: +10 points
 ```

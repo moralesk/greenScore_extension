@@ -2,11 +2,14 @@
 // Single source of truth for all environmental calculations
 
 const GreenCalculator = {
-    // Constants based on CO2.js methodology
+    // Constants based on CO2.js methodology and water usage research
     CONSTANTS: {
         KWH_PER_BYTE: 0.000000006,
         GRID_INTENSITY: 519, // gCO2/kWh global average
         GREEN_HOSTING_FACTOR: 0.5,
+        WATER_PER_KWH: 1.8, // liters per kWh (data center average)
+        AI_WATER_MULTIPLIER: 2.5, // AI processing uses more water for cooling
+        GREEN_WATER_FACTOR: 0.7, // Green hosting typically uses less water
         DEFAULT_PAGE_SIZE: 2000000, // 2MB fallback
         SPECIAL_PAGE_SIZE: 1000000, // 1MB for chrome:// etc
         API_TIMEOUT: 3000 // 3 seconds
@@ -19,6 +22,35 @@ const GreenCalculator = {
             this.CONSTANTS.GRID_INTENSITY * this.CONSTANTS.GREEN_HOSTING_FACTOR :
             this.CONSTANTS.GRID_INTENSITY;
         return energy * intensity; // grams of CO2
+    },
+
+    // Calculate water usage for data transfer and processing
+    calculateWater: function (bytes, isGreen = false, isAI = false) {
+        const energy = bytes * this.CONSTANTS.KWH_PER_BYTE;
+        let waterPerKwh = this.CONSTANTS.WATER_PER_KWH;
+
+        // AI processing requires more cooling, thus more water
+        if (isAI) {
+            waterPerKwh *= this.CONSTANTS.AI_WATER_MULTIPLIER;
+        }
+
+        // Green hosting typically uses more efficient cooling
+        if (isGreen) {
+            waterPerKwh *= this.CONSTANTS.GREEN_WATER_FACTOR;
+        }
+
+        return energy * waterPerKwh; // liters of water
+    },
+
+    // Format water usage display
+    formatWater: function (waterLiters) {
+        if (waterLiters < 0.001) {
+            return `${(waterLiters * 1000000).toFixed(0)}μL`;
+        } else if (waterLiters < 1) {
+            return `${(waterLiters * 1000).toFixed(1)}mL`;
+        } else {
+            return `${waterLiters.toFixed(2)}L`;
+        }
     },
 
     // Convert CO2 grams to 0-100 score
@@ -257,10 +289,13 @@ const GreenCalculator = {
 
             // Calculate base environmental impact
             const baseCO2 = this.calculateCO2(pageSize, isGreen);
+            const baseWater = this.calculateWater(pageSize, isGreen, false);
 
             // Apply AI multiplier if AI is detected
             const totalCO2 = baseCO2 * aiAnalysis.aiImpactMultiplier;
+            const totalWater = this.calculateWater(pageSize, isGreen, aiAnalysis.aiDetected);
             const aiCO2 = totalCO2 - baseCO2; // Additional CO2 from AI usage
+            const aiWater = totalWater - baseWater; // Additional water from AI usage
 
             // Calculate scores
             const baseScore = this.calculateGreenScore(baseCO2, isGreen);
@@ -275,10 +310,14 @@ const GreenCalculator = {
                 color: this.getScoreColor(totalScore),
                 co2Grams: totalCO2,
                 co2Display: this.formatCO2(totalCO2),
+                waterLiters: totalWater,
+                waterDisplay: this.formatWater(totalWater),
 
                 // Base website metrics
                 baseCO2: baseCO2,
                 baseCO2Display: this.formatCO2(baseCO2),
+                baseWater: baseWater,
+                baseWaterDisplay: this.formatWater(baseWater),
                 baseScore: baseScore,
 
                 // AI-specific metrics
@@ -287,6 +326,8 @@ const GreenCalculator = {
                 aiModel: aiAnalysis.aiModel,
                 aiCO2: aiCO2,
                 aiCO2Display: this.formatCO2(aiCO2),
+                aiWater: aiWater,
+                aiWaterDisplay: this.formatWater(aiWater),
                 aiImpactMultiplier: aiAnalysis.aiImpactMultiplier,
 
                 // Infrastructure metrics
@@ -303,6 +344,7 @@ const GreenCalculator = {
             // Return fallback data
             const fallbackPageSize = this.CONSTANTS.DEFAULT_PAGE_SIZE;
             const fallbackCO2 = this.calculateCO2(fallbackPageSize, false);
+            const fallbackWater = this.calculateWater(fallbackPageSize, false, false);
             const fallbackScore = this.calculateGreenScore(fallbackCO2, false);
 
             return {
@@ -313,14 +355,20 @@ const GreenCalculator = {
                 color: this.getScoreColor(fallbackScore),
                 co2Grams: fallbackCO2,
                 co2Display: `~${this.formatCO2(fallbackCO2)}`,
+                waterLiters: fallbackWater,
+                waterDisplay: `~${this.formatWater(fallbackWater)}`,
                 baseCO2: fallbackCO2,
                 baseCO2Display: `~${this.formatCO2(fallbackCO2)}`,
+                baseWater: fallbackWater,
+                baseWaterDisplay: `~${this.formatWater(fallbackWater)}`,
                 baseScore: fallbackScore,
                 aiDetected: false,
                 aiType: 'none',
                 aiModel: null,
                 aiCO2: 0,
                 aiCO2Display: '0g',
+                aiWater: 0,
+                aiWaterDisplay: '0mL',
                 aiImpactMultiplier: 1.0,
                 pageSize: fallbackPageSize,
                 pageSizeDisplay: `~${this.formatPageSize(fallbackPageSize)}`,
@@ -365,8 +413,10 @@ const GreenCalculator = {
             if (data.aiDetected) {
                 tooltipHTML += `• Base website: ${data.baseCO2Display}<br>`;
                 tooltipHTML += `• Total CO2: ${data.co2Display}${statusText}<br>`;
+                tooltipHTML += `• Water usage: ${data.waterDisplay}${statusText}<br>`;
             } else {
                 tooltipHTML += `• CO2 per visit: ${data.co2Display}${statusText}<br>`;
+                tooltipHTML += `• Water usage: ${data.waterDisplay}${statusText}<br>`;
             }
             tooltipHTML += `• Page size: ${data.pageSizeDisplay}${statusText}<br>`;
             tooltipHTML += `• Green hosting: ${greenHostingText}<br>`;

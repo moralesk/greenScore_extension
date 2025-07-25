@@ -2,14 +2,28 @@ chrome.tabs.query({ active: true, currentWindow: true }, async function (tabs) {
     const score = document.getElementById('score');
     const details = document.getElementById('details');
 
-    // Show loading state
-    score.textContent = '⏳';
-    details.textContent = 'Calculating environmental impact...';
-
     console.log('Starting calculation for:', tabs[0].url);
 
+    // First, try to get cached data from background script for immediate display
     try {
-        // Use the shared calculator
+        // Check if we have cached badge data
+        const badgeText = await chrome.action.getBadgeText({ tabId: tabs[0].id });
+        if (badgeText && badgeText !== '?') {
+            score.textContent = badgeText;
+            // Set a default color until we get the real data
+            score.style.color = '#666';
+        } else {
+            score.textContent = '⏳';
+        }
+    } catch (error) {
+        score.textContent = '⏳';
+    }
+
+    // Show loading state for details
+    details.textContent = 'Calculating detailed breakdown...';
+
+    try {
+        // Use the shared calculator for detailed data
         const data = await GreenCalculator.calculateEnvironmentalImpact(tabs[0].url);
 
         console.log('Calculation result:', data);
@@ -47,8 +61,10 @@ chrome.tabs.query({ active: true, currentWindow: true }, async function (tabs) {
             if (data.aiDetected) {
                 detailsHTML += `• Base website: ${data.baseCO2Display}<br>`;
                 detailsHTML += `• Total CO2: ${data.co2Display}${statusText}<br>`;
+                detailsHTML += `• Water usage: ${data.waterDisplay}${statusText}<br>`;
             } else {
                 detailsHTML += `• CO2 per visit: ${data.co2Display}${statusText}<br>`;
+                detailsHTML += `• Water usage: ${data.waterDisplay}${statusText}<br>`;
             }
             detailsHTML += `• Page size: ${data.pageSizeDisplay}${statusText}<br>`;
             detailsHTML += `• Green hosting: ${greenHostingText}<br>`;

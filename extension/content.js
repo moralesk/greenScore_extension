@@ -530,30 +530,13 @@ function showBadgeWithDetection(staticInfo, detectedInfo) {
   }
 }
 
-// Load external data and perform AI detection
-Promise.all([
-  fetch("https://raw.githubusercontent.com/moralesk/greenScore_extension/main/data/site-models.json")
-    .then(res => res.json())
-    .catch(err => {
-      console.error("Failed to load GreenScore data:", err);
-      return {};
-    }),
+// Perform AI detection after page loads
+setTimeout(() => {
+  const detectedSources = detectAISources();
+  const estimatedImpact = estimateEnvironmentalImpact(detectedSources);
 
-  // Perform AI detection
-  new Promise(resolve => {
-    // Wait a bit for page to load completely
-    setTimeout(() => {
-      const detectedSources = detectAISources();
-      const estimatedImpact = estimateEnvironmentalImpact(detectedSources);
-      resolve(estimatedImpact);
-    }, 1000);
-  })
-]).then(([staticData, detectedData]) => {
-  const hostname = window.location.hostname.replace("www.", "");
-  const staticInfo = staticData[hostname];
-
-  showBadgeWithEnvironmentalData(staticInfo, detectedData);
-});
+  showBadgeWithEnvironmentalData(null, estimatedImpact);
+}, 1000);
 
 // Re-run detection when page content changes (for SPAs)
 let detectionTimeout;
@@ -565,16 +548,7 @@ const observer = new MutationObserver(() => {
 
     // Only update if we have reasonable confidence
     if (estimatedImpact.confidence > 5) {
-      fetch("https://raw.githubusercontent.com/moralesk/greenScore_extension/main/data/site-models.json")
-        .then(res => res.json())
-        .then(staticData => {
-          const hostname = window.location.hostname.replace("www.", "");
-          const staticInfo = staticData[hostname];
-          showBadgeWithDetection(staticInfo, estimatedImpact);
-        })
-        .catch(() => {
-          showBadgeWithDetection(null, estimatedImpact);
-        });
+      showBadgeWithEnvironmentalData(null, estimatedImpact);
     }
   }, 2000);
 });

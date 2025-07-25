@@ -41,7 +41,6 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "data/site-models.json",
         "green-calculator.js"
       ],
       "matches": [
