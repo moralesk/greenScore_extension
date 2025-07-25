@@ -3,15 +3,16 @@
   "description": "Shows environmental impact of AI tools",
   "version": "1.0",
   "manifest_version": 3,
-  "permissions": [
-    "scripting"
-  ],
   "host_permissions": [
     "https://*/*",
     "http://*/*"
   ],
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_title": "GreenScore AI"
+  },
+  "background": {
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
@@ -24,5 +25,9 @@
         "content.js"
       ]
     }
+  ],
+  "permissions": [
+    "scripting",
+    "tabs"
   ]
 }

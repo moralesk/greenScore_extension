@@ -1,18 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8" />
+    <title>GreenScore AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 16px;
+            width: 250px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        h1 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #3a7f45;
+        }
+
+        #score {
+            font-size: 36px;
+            font-weight: bold;
+            text-align: center;
+            color: #3a7f45;
+            margin-bottom: 12px;
+        }
+
+        #details {
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        #contribute {
+            display: block;
+            background-color: #3a7f45;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        #contribute:hover {
+            background-color: #2e6f38;
+        }
+    </style>
 </head>
 
 <body>
-    <h2>GreenScore AI</h2>
-    <p>See how energy- and water-efficient your AI tools are!</p>
-    <ul>
-        <li><strong>GPT-4</strong>: ⚡ High, 💧 High</li>
-        <li><strong>Claude 3</strong>: ⚡ Medium, 💧 Unknown</li>
-        <li><strong>Gemini</strong>: ⚡ Medium, 💧 Medium</li>
-    </ul>
+    <h1>🌱 GreenScore AI</h1>
+    <div id="score">?</div>
+    <div id="details">Model and environmental info will appear here.</div>
+    <a id="contribute" href="https://github.com/moralesk/greenScore_extension/issues/new?template=add-model-data.yml"
+        target="_blank">
+        💡 Contribute Data
+    </a>
+
+    <script src="popup.js"></script>
 </body>
 
 </html>
