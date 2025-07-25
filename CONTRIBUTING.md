@@ -7,7 +7,8 @@ Thank you for helping improve GreenScore! 🌱
 GreenScore automatically calculates environmental impact using:
 - **Real-time CO2 calculations** based on page size and data transfer
 - **Green hosting detection** via the Green Web Foundation API  
-- **AI model detection** for sites using ChatGPT, Claude, Gemini, etc.
+- **Dynamic AI pattern system** that updates automatically from GitHub
+- **Community-driven AI detection** for sites using ChatGPT, Claude, Gemini, etc.
 - **Dynamic impact multipliers** based on AI processing requirements
 
 ## When to Contribute
@@ -31,27 +32,50 @@ A site has significantly different CO2 or water usage than our calculations sugg
 - **What's wrong/missing** (e.g., "Uses GPT-4 but not detected")
 - **Correct information** (if known)
 
-### Option 2: Direct JSON Update (Advanced)
-If you're comfortable with JSON, you can directly update `data/site-models.json`:
+### Option 2: Direct AI Patterns Update (Advanced)
+If you're comfortable with JSON, you can directly update [`data/ai-patterns.json`](data/ai-patterns.json):
 
 ```json
 {
-  "example.com": {
-    "model": "GPT-4",
-    "rating": 2,
-    "energy": "high",
-    "water": "high",
-    "notes": "Primary AI service with heavy processing"
+  "version": "1.1.0",
+  "lastUpdated": "2025-01-25",
+  "domains": [
+    "newai.com"
+  ],
+  "multipliers": {
+    "newai.com": 2.8
   }
 }
 ```
 
-**Rating Scale:**
-- `5` = Excellent (minimal environmental impact)
-- `4` = Good (low impact)  
-- `3` = Fair (moderate impact)
-- `2` = Poor (high impact)
-- `1` = Very Poor (very high impact)
+**AI Multipliers:**
+- `3.5` = Very High Impact (ChatGPT, GPT-4)
+- `3.2` = High Impact (Gemini)
+- `3.0` = High Impact (Claude)
+- `1.8` = Medium Impact (GitHub Copilot)
+- `1.6` = Medium Impact (Notion AI)
+- `1.5` = Low Impact (Basic AI features)
+
+## 🔄 Dynamic Update System
+
+### **How It Works**
+1. **AI patterns stored** in [`data/ai-patterns.json`](data/ai-patterns.json)
+2. **Extension fetches** patterns from GitHub every 24 hours
+3. **Your contributions** automatically reach all users
+4. **Version controlled** - track changes and ensure quality
+
+### **What Gets Updated Automatically**
+- **New AI domains** - Add newly discovered AI services
+- **Impact multipliers** - Adjust environmental impact factors
+- **Detection keywords** - Improve AI content recognition
+- **API patterns** - Detect new AI service endpoints
+
+### **Contributing AI Patterns**
+When reporting missing AI detection, include:
+- **Domain name** (e.g., "newai.com")
+- **AI model type** (e.g., "GPT-4", "Claude", "Custom LLM")
+- **Service type** (Primary AI service vs. AI features)
+- **Evidence** (screenshots, documentation links)
 
 ## What We Don't Need
 

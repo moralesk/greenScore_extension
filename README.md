@@ -63,7 +63,24 @@ GreenScore automatically calculates the environmental footprint of websites you 
 ### **Data Sources**
 - **[Green Web Foundation API](https://www.thegreenwebfoundation.org/)** - Renewable energy hosting verification
 - **Real-time page analysis** - Actual data transfer measurements
-- **Built-in AI detection** - Pattern matching for AI services and content
+- **Dynamic AI patterns** - Community-updated detection patterns from GitHub
+- **Built-in fallback patterns** - Ensures functionality when offline
+
+## 🔄 Dynamic Updates
+
+### **Community-Driven AI Detection**
+GreenScore uses a dynamic pattern system that automatically updates when the community contributes improvements:
+
+- **Automatic Updates** - New AI services and corrections deploy within 24 hours
+- **GitHub-Based** - All patterns stored in [`data/ai-patterns.json`](data/ai-patterns.json)
+- **Version Controlled** - Track changes and ensure quality
+- **Cached Locally** - 24-hour cache for performance, with graceful fallbacks
+
+### **How Updates Work**
+1. **Community reports** missing AI detection via GitHub issues
+2. **Maintainers update** `ai-patterns.json` with new patterns
+3. **Extension automatically fetches** updated patterns within 24 hours
+4. **All users benefit** from improved detection without manual updates
 
 ## 🤝 Contributing
 

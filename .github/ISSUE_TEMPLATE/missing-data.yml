@@ -8,7 +8,9 @@ body:
       value: |
         Thanks for helping improve GreenScore! 🌱
         
-        **Note:** GreenScore automatically calculates most environmental data. Only report cases where our detection is missing or incorrect.
+        **Note:** GreenScore uses dynamic AI patterns that update automatically. Your contributions will be deployed to all users within 24 hours once accepted.
+        
+        Only report cases where our detection is missing or incorrect - we calculate most environmental data automatically.
 
   - type: input
     id: website_url
@@ -80,6 +82,18 @@ body:
       description: What would be the correct information?
       placeholder: "e.g., Should detect GPT-4 with high environmental impact"
 
+  - type: dropdown
+    id: impact_level
+    attributes:
+      label: Expected Environmental Impact Level (for AI services)
+      description: How much environmental impact should this AI service have?
+      options:
+        - "Very High (3.5x) - Primary AI services like ChatGPT"
+        - "High (3.0-3.2x) - Advanced AI services like Claude, Gemini"
+        - "Medium (1.6-1.8x) - AI features like GitHub Copilot, Notion AI"
+        - "Low (1.5x) - Basic AI functionality"
+        - "Not applicable - This is not about AI detection"
+
   - type: checkboxes
     id: verification
     attributes:
@@ -88,4 +102,6 @@ body:
         - label: "I have verified this information is accurate"
           required: true
         - label: "I have checked that this isn't already reported in existing issues"
+          required: true
+        - label: "I understand this will update the AI patterns for all users within 24 hours"
           required: true

@@ -41,7 +41,8 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "green-calculator.js"
+        "green-calculator.js",
+        "data/ai-patterns.json"
       ],
       "matches": [
         "<all_urls>"

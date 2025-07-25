@@ -12,8 +12,13 @@ const GreenCalculator = {
         GREEN_WATER_FACTOR: 0.7, // Green hosting typically uses less water
         DEFAULT_PAGE_SIZE: 2000000, // 2MB fallback
         SPECIAL_PAGE_SIZE: 1000000, // 1MB for chrome:// etc
-        API_TIMEOUT: 3000 // 3 seconds
+        API_TIMEOUT: 3000, // 3 seconds
+        CACHE_DURATION: 24 * 60 * 60 * 1000 // 24 hours in milliseconds
     },
+
+    // Cache for AI patterns
+    aiPatternsCache: null,
+    aiPatternsCacheTime: 0,
 
     // Core calculation function
     calculateCO2: function (bytes, isGreen = false) {
@@ -184,82 +189,134 @@ const GreenCalculator = {
         }
     },
 
-    // AI detection patterns
-    AI_PATTERNS: {
-        domains: [
-            'openai.com', 'chatgpt.com', 'claude.ai', 'anthropic.com',
-            'gemini.google.com', 'bard.google.com', 'cohere.ai',
-            'huggingface.co', 'replicate.com', 'stability.ai',
-            'midjourney.com', 'runwayml.com', 'character.ai',
-            'perplexity.ai', 'you.com', 'poe.com', 'jasper.ai',
-            'copy.ai', 'writesonic.com'
-        ],
-        partialAIDomains: [
-            'notion.so', 'github.com', 'stackoverflow.com', 'reddit.com'
-        ],
-        keywords: [
-            'gpt', 'chatgpt', 'claude', 'gemini', 'bard', 'llama',
-            'artificial intelligence', 'machine learning', 'neural network',
-            'deep learning', 'transformer', 'language model', 'ai model',
-            'openai', 'anthropic', 'cohere', 'hugging face',
-            'ai-powered', 'ai assistant', 'chatbot', 'ai chat', 'generative ai',
-            'large language model', 'llm', 'copilot', 'ai code'
-        ]
+    // Load AI patterns dynamically from GitHub with caching
+    loadAIPatterns: async function () {
+        const now = Date.now();
+
+        // Return cached patterns if still valid
+        if (this.aiPatternsCache && (now - this.aiPatternsCacheTime) < this.CONSTANTS.CACHE_DURATION) {
+            return this.aiPatternsCache;
+        }
+
+        try {
+            const response = await this.withTimeout(
+                fetch('https://raw.githubusercontent.com/moralesk/greenScore_extension/main/data/ai-patterns.json', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    mode: 'cors'
+                })
+            );
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const patterns = await response.json();
+
+            // Cache the patterns
+            this.aiPatternsCache = patterns;
+            this.aiPatternsCacheTime = now;
+
+            console.log(`AI patterns loaded (v${patterns.version})`);
+            return patterns;
+        } catch (error) {
+            console.log('Failed to load AI patterns from GitHub, using fallback:', error.message);
+
+            // Return fallback patterns
+            const fallbackPatterns = {
+                version: '1.0.0-fallback',
+                domains: [
+                    'openai.com', 'chatgpt.com', 'claude.ai', 'anthropic.com',
+                    'gemini.google.com', 'bard.google.com', 'cohere.ai',
+                    'huggingface.co', 'replicate.com', 'stability.ai',
+                    'midjourney.com', 'runwayml.com', 'character.ai',
+                    'perplexity.ai', 'you.com', 'poe.com', 'jasper.ai',
+                    'copy.ai', 'writesonic.com'
+                ],
+                partialAIDomains: [
+                    'notion.so', 'github.com', 'stackoverflow.com', 'reddit.com'
+                ],
+                keywords: [
+                    'gpt', 'chatgpt', 'claude', 'gemini', 'bard', 'llama',
+                    'artificial intelligence', 'machine learning', 'neural network',
+                    'deep learning', 'transformer', 'language model', 'ai model',
+                    'openai', 'anthropic', 'cohere', 'hugging face',
+                    'ai-powered', 'ai assistant', 'chatbot', 'ai chat', 'generative ai',
+                    'large language model', 'llm', 'copilot', 'ai code'
+                ],
+                multipliers: {
+                    'chatgpt.com': 3.5,
+                    'openai.com': 3.5,
+                    'gemini.google.com': 3.2,
+                    'claude.ai': 3.0,
+                    'github.com': 1.8,
+                    'notion.so': 1.6
+                }
+            };
+
+            // Cache fallback patterns for a shorter time
+            this.aiPatternsCache = fallbackPatterns;
+            this.aiPatternsCacheTime = now;
+
+            return fallbackPatterns;
+        }
     },
 
-    // Detect AI usage on a page
-    detectAIUsage: function (url, pageContent = '') {
+    // Detect AI usage on a page using dynamic patterns
+    detectAIUsage: async function (url, pageContent = '') {
         const domain = new URL(url).hostname.replace(/^www\./, '');
         let aiImpactMultiplier = 1.0;
         let aiDetected = false;
         let aiType = 'none';
         let aiModel = null;
 
+        // Load AI patterns dynamically
+        const patterns = await this.loadAIPatterns();
+
         // Check for primary AI service domains
-        const matchedDomain = this.AI_PATTERNS.domains.find(aiDomain =>
+        const matchedDomain = patterns.domains.find(aiDomain =>
             domain.includes(aiDomain) || aiDomain.includes(domain)
         );
 
         if (matchedDomain) {
             aiDetected = true;
             aiType = 'primary_ai_service';
-            aiImpactMultiplier = 3.0; // 3x environmental impact for AI services
+
+            // Use multiplier from patterns if available, otherwise default
+            aiImpactMultiplier = patterns.multipliers[domain] || patterns.multipliers[matchedDomain] || 3.0;
 
             // Identify specific AI models
             if (matchedDomain.includes('chatgpt') || matchedDomain.includes('openai')) {
                 aiModel = 'GPT-4';
-                aiImpactMultiplier = 3.5;
             } else if (matchedDomain.includes('claude') || matchedDomain.includes('anthropic')) {
                 aiModel = 'Claude';
-                aiImpactMultiplier = 3.0;
             } else if (matchedDomain.includes('gemini') || matchedDomain.includes('bard')) {
                 aiModel = 'Gemini';
-                aiImpactMultiplier = 3.2;
             }
         }
 
         // Check for partial AI domains
-        const matchedPartialDomain = this.AI_PATTERNS.partialAIDomains.find(aiDomain =>
+        const matchedPartialDomain = patterns.partialAIDomains.find(aiDomain =>
             domain.includes(aiDomain) || aiDomain.includes(domain)
         );
 
         if (matchedPartialDomain && !matchedDomain) {
             // Check page content for AI keywords to determine if AI features are being used
-            const keywordCount = this.AI_PATTERNS.keywords.filter(keyword =>
+            const keywordCount = patterns.keywords.filter(keyword =>
                 pageContent.toLowerCase().includes(keyword.toLowerCase())
             ).length;
 
             if (keywordCount > 3) {
                 aiDetected = true;
                 aiType = 'ai_features';
-                aiImpactMultiplier = 1.5; // 1.5x impact for sites with AI features
+
+                // Use multiplier from patterns if available, otherwise default
+                aiImpactMultiplier = patterns.multipliers[domain] || patterns.multipliers[matchedPartialDomain] || 1.5;
 
                 if (matchedPartialDomain.includes('github.com') && pageContent.toLowerCase().includes('copilot')) {
                     aiModel = 'GitHub Copilot';
-                    aiImpactMultiplier = 1.8;
                 } else if (matchedPartialDomain.includes('notion.so')) {
                     aiModel = 'Notion AI';
-                    aiImpactMultiplier = 1.6;
                 }
             }
         }
@@ -285,7 +342,7 @@ const GreenCalculator = {
             ]);
 
             // Detect AI usage
-            const aiAnalysis = this.detectAIUsage(url, pageContent);
+            const aiAnalysis = await this.detectAIUsage(url, pageContent);
 
             // Calculate base environmental impact
             const baseCO2 = this.calculateCO2(pageSize, isGreen);
