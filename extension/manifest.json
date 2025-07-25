@@ -1,0 +1,28 @@
+{
+  "name": "GreenScore AI",
+  "description": "Shows environmental impact of AI tools",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": [
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ]
+}

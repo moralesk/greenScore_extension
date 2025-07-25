@@ -1,0 +1,14 @@
+{
+    "chatgpt.com": {
+        "model": "GPT-4",
+        "energy": "high",
+        "water": "high",
+        "rating": 2
+    },
+    "claude.ai": {
+        "model": "Claude 3 Opus",
+        "energy": "medium",
+        "water": "medium",
+        "rating": 3
+    }
+}
