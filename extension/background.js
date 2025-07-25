@@ -11,22 +11,27 @@ function getBadgeColor(score) {
 }
 
 function updateBadge(tabId, url) {
-    const domain = new URL(url).hostname.replace(/^www\./, '');
+    let hostname = new URL(url).hostname.replace(/^www\./, "");
 
-    fetch(chrome.runtime.getURL('site-models.json'))
+    fetch("https://raw.githubusercontent.com/moralesk/greenScore_extension/main/data/site-models.json")
         .then((res) => res.json())
         .then((data) => {
-            const siteInfo = data[domain];
-            if (siteInfo && siteInfo.greenscore != null) {
-                const score = String(siteInfo.greenscore);
+            const siteInfo = data[hostname];
+            console.log("Loaded site models:", siteInfo);
+
+            if (siteInfo && siteInfo.rating != null) {
+                const score = String(siteInfo.rating);
                 chrome.action.setBadgeText({ text: score, tabId });
                 chrome.action.setBadgeBackgroundColor({ color: getBadgeColor(score), tabId });
+                chrome.action.setTitle({ title: `GreenScore: ${score}`, tabId });
             } else {
                 chrome.action.setBadgeText({ text: '', tabId });
+                chrome.action.setTitle({ title: '', tabId });
             }
+
         })
         .catch((err) => {
-            console.error('Error loading site-models:', err);
+            console.error("Failed to fetch site models:", err);
         });
 }
 

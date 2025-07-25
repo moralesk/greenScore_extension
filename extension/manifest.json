@@ -5,7 +5,8 @@
   "manifest_version": 3,
   "host_permissions": [
     "https://*/*",
-    "http://*/*"
+    "http://*/*",
+    "<all_urls>"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -19,7 +20,8 @@
       "matches": [
         "https://chatgpt.com/*",
         "https://claude.ai/*",
-        "https://gemini.google.com/*"
+        "https://gemini.google.com/*",
+        "<all_urls>"
       ],
       "js": [
         "content.js"
@@ -27,7 +29,19 @@
     }
   ],
   "permissions": [
+    "activeTab",
     "scripting",
+    "storage",
     "tabs"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "data/site-models.json"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
   ]
 }

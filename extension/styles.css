@@ -20,3 +20,19 @@ li {
     padding: 4px 0;
     font-size: 14px;
 }
+
+.contribute-button {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 10px 14px;
+    background-color: #4caf50;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+.contribute-button:hover {
+    background-color: #388e3c;
+}

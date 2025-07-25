@@ -10,5 +10,9 @@
         "energy": "medium",
         "water": "medium",
         "rating": 3
+    },
+    "gemini.google.com": {
+        "model": "Gemini",
+        "rating": 2
     }
 }
