@@ -36,3 +36,39 @@ li {
 .contribute-button:hover {
     background-color: #388e3c;
 }
+
+#donation-section {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #ddd;
+}
+
+#donation-section h2 {
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #228B22;
+}
+
+.charity-links {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.charity-link {
+    display: block;
+    padding: 8px 10px;
+    background-color: #e8f5e8;
+    color: #2e7d32;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    border: 1px solid #c8e6c9;
+}
+
+.charity-link:hover {
+    background-color: #c8e6c9;
+    color: #1b5e20;
+}
