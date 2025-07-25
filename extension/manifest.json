@@ -6,6 +6,7 @@
   "host_permissions": [
     "https://*/*",
     "http://*/*",
+    "https://api.thegreenwebfoundation.org/*",
     "<all_urls>"
   ],
   "action": {
@@ -34,10 +35,14 @@
     "storage",
     "tabs"
   ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
   "web_accessible_resources": [
     {
       "resources": [
-        "data/site-models.json"
+        "data/site-models.json",
+        "green-calculator.js"
       ],
       "matches": [
         "<all_urls>"

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="styles.css" />
-    <title>GreenScore AI</title>
+    <title>GreenScore</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,13 +24,25 @@
             font-size: 36px;
             font-weight: bold;
             text-align: center;
-            color: #3a7f45;
             margin-bottom: 12px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #details {
-            font-size: 14px;
+            font-size: 12px;
             margin-bottom: 12px;
+            line-height: 1.4;
+            background-color: #f9f9f9;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+
+        #details strong {
+            color: #2e7d32;
         }
 
         #contribute {
@@ -51,13 +63,13 @@
 </head>
 
 <body>
-    <h1>🌱 GreenScore AI</h1>
+    <h1>🌱 GreenScore</h1>
     <div id="score">?</div>
     <div id="details">Model and environmental info will appear here.</div>
 
-    <a href="https://github.com/moralesk/greenScore_extension/issues/new?template=add_model.yml" target="_blank"
+    <a href="https://github.com/moralesk/greenScore_extension/issues/new?template=missing-data.yml" target="_blank"
         class="contribute-button">
-        💡 Contribute Data
+        💡 Report Missing Data
     </a>
 
     <div id="donation-section">
@@ -79,6 +91,7 @@
         </div>
     </div>
 
+    <script src="green-calculator.js"></script>
     <script src="popup.js"></script>
 </body>
 

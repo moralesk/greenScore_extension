@@ -1,38 +1,24 @@
-function getBadgeColor(score) {
-    const colors = {
-        '0': '#d32f2f', // red
-        '1': '#f57c00', // orange
-        '2': '#fbc02d', // yellow
-        '3': '#c0ca33', // yellow-green
-        '4': '#7cb342', // light green
-        '5': '#388e3c'  // green
-    };
-    return colors[score] || '#9e9e9e'; // default gray
-}
+// Import the shared calculator
+importScripts('green-calculator.js');
 
-function updateBadge(tabId, url) {
-    let hostname = new URL(url).hostname.replace(/^www\./, "");
+async function updateBadge(tabId, url) {
+    try {
+        // Use the shared calculator
+        const data = await GreenCalculator.calculateEnvironmentalImpact(url);
 
-    fetch("https://raw.githubusercontent.com/moralesk/greenScore_extension/main/data/site-models.json")
-        .then((res) => res.json())
-        .then((data) => {
-            const siteInfo = data[hostname];
-            console.log("Loaded site models:", siteInfo);
+        // Create detailed tooltip with calculation breakdown
+        const tooltip = GreenCalculator.generateTooltip(data);
 
-            if (siteInfo && siteInfo.rating != null) {
-                const score = String(siteInfo.rating);
-                chrome.action.setBadgeText({ text: score, tabId });
-                chrome.action.setBadgeBackgroundColor({ color: getBadgeColor(score), tabId });
-                chrome.action.setTitle({ title: `GreenScore: ${score}`, tabId });
-            } else {
-                chrome.action.setBadgeText({ text: '', tabId });
-                chrome.action.setTitle({ title: '', tabId });
-            }
+        // Update badge
+        chrome.action.setBadgeText({ text: data.letterGrade, tabId });
+        chrome.action.setBadgeBackgroundColor({ color: data.color, tabId });
+        chrome.action.setTitle({ title: tooltip, tabId });
 
-        })
-        .catch((err) => {
-            console.error("Failed to fetch site models:", err);
-        });
+    } catch (error) {
+        console.error('Environmental calculation failed:', error);
+        chrome.action.setBadgeText({ text: '?', tabId });
+        chrome.action.setTitle({ title: 'Unable to calculate environmental impact', tabId });
+    }
 }
 
 // Update badge when tab changes or page loads
@@ -48,4 +34,12 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
             updateBadge(activeInfo.tabId, tab.url);
         }
     });
+});
+
+// Handle messages from content script
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'openPopup') {
+        // Open the extension popup
+        chrome.action.openPopup();
+    }
 });

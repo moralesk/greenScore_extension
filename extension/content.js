@@ -1,4 +1,15 @@
-// Color scale from red (0) to green (5)
+// Load the shared calculator
+const script = document.createElement('script');
+script.src = chrome.runtime.getURL('green-calculator.js');
+document.head.appendChild(script);
+
+// Wait for the calculator to load
+let calculatorReady = false;
+script.onload = () => {
+  calculatorReady = true;
+};
+
+// Color function for AI detection badges (0-5 scale)
 function getBadgeColor(rating) {
   const colors = [
     "#c0392b", // 0 - Red
@@ -9,6 +20,53 @@ function getBadgeColor(rating) {
     "#1e8449"  // 5 - Dark Green
   ];
   return colors[Math.max(0, Math.min(rating, 5))];
+}
+
+// Enhanced badge showing function that uses environmental calculator when available
+async function showBadgeWithEnvironmentalData(staticInfo, detectedInfo) {
+  // If calculator is ready, use environmental data with AI detection
+  if (calculatorReady && typeof GreenCalculator !== 'undefined') {
+    try {
+      // Get page content for AI detection
+      const pageContent = document.body.innerText || '';
+      const envData = await GreenCalculator.calculateEnvironmentalImpact(window.location.href, pageContent);
+
+      const environmentalInfo = {
+        rating: envData.letterGrade,
+        model: envData.aiDetected ? envData.aiModel : 'Environmental Impact',
+        energy: envData.aiDetected ? `${envData.baseCO2Display} + ${envData.aiCO2Display} AI` : envData.co2Display,
+        water: envData.isGreen ? 'Green hosting' : 'Standard hosting',
+        environmentalData: envData,
+        aiDetected: envData.aiDetected,
+        letterGrade: envData.letterGrade,
+        score: envData.score,
+        color: envData.color,
+        aiBreakdown: envData.aiDetected ? {
+          baseImpact: envData.baseCO2Display,
+          aiImpact: envData.aiCO2Display,
+          totalImpact: envData.co2Display,
+          aiModel: envData.aiModel
+        } : null
+      };
+
+      showBadge(environmentalInfo);
+      return;
+    } catch (error) {
+      console.log('Environmental calculation failed, falling back to AI detection:', error);
+    }
+  }
+
+  // Fallback to original AI detection logic
+  const info = staticInfo || detectedInfo;
+  if (!info && (!detectedInfo || detectedInfo.confidence < 5)) {
+    return;
+  }
+
+  showBadge(info);
+
+  if (detectedInfo && detectedInfo.confidence > 0) {
+    console.log('GreenScore AI Detection Results:', detectedInfo);
+  }
 }
 
 function createTooltip() {
@@ -36,11 +94,13 @@ function showTooltip(badge, info, event) {
     tooltip = createTooltip();
   }
 
-  let tooltipContent = `<strong>GreenScore: ${info?.rating || '?'}/5</strong><br>`;
+  // Show letter grade if available, otherwise show old format
+  const scoreDisplay = info?.letterGrade ? `${info.letterGrade}` : `${info?.rating || '?'}/5`;
+  let tooltipContent = `<strong>GreenScore: ${scoreDisplay}</strong><br>`;
 
   if (info) {
     if (info.model) {
-      tooltipContent += `Model: ${info.model}<br>`;
+      tooltipContent += `AI Model: ${info.model}<br>`;
     }
     if (info.energy) {
       tooltipContent += `Energy Usage: ${info.energy}<br>`;
@@ -65,7 +125,7 @@ function showTooltip(badge, info, event) {
 
     // Show detection details if this was detected (not from static data)
     if (info.detectedSources && info.confidence) {
-      tooltipContent += `<br><strong>Detection Details:</strong><br>`;
+      tooltipContent += `<br><strong>AI Detection Details:</strong><br>`;
 
       // Add explanation based on detection type
       const detectionExplanations = {
@@ -103,10 +163,10 @@ function showTooltip(badge, info, event) {
       }
     }
 
-    tooltipContent += `<br><em>Click to contribute data</em>`;
+    tooltipContent += `<br><em>Click to see detailed breakdown</em>`;
   } else {
     tooltipContent += 'No environmental data available<br>';
-    tooltipContent += `<br><em>Click to contribute data</em>`;
+    tooltipContent += `<br><em>Click to see detailed breakdown</em>`;
   }
 
   tooltip.innerHTML = tooltipContent;
@@ -147,7 +207,8 @@ function showBadge(info) {
     document.body.appendChild(badge);
 
     badge.addEventListener('click', () => {
-      window.open('https://github.com/moralesk/greenScore_extension/issues/new?template=add_model.yml', '_blank');
+      // Open the extension popup
+      chrome.runtime.sendMessage({ action: 'openPopup' });
     });
   }
 
@@ -172,9 +233,16 @@ function showBadge(info) {
   badge.addEventListener('mouseleave', badge._mouseLeaveHandler);
 
   if (info?.rating != null) {
-    const score = info.rating;
-    badge.textContent = `🌱 GreenScore: ${score}`;
-    badge.style.backgroundColor = getBadgeColor(score);
+    // Use letter grade if available, otherwise use the rating
+    const displayScore = info?.letterGrade ? `${info.letterGrade}` : `${info?.rating || '?'}/5`;
+    badge.textContent = `🌱 GreenScore: ${displayScore}`;
+
+    // Use environmental color if available, otherwise use old color system
+    if (info.color) {
+      badge.style.backgroundColor = info.color;
+    } else {
+      badge.style.backgroundColor = getBadgeColor(info.rating);
+    }
   } else {
     badge.textContent = '🌱 GreenScore: ?';
     badge.style.backgroundColor = '#9e9e9e';
@@ -484,7 +552,7 @@ Promise.all([
   const hostname = window.location.hostname.replace("www.", "");
   const staticInfo = staticData[hostname];
 
-  showBadgeWithDetection(staticInfo, detectedData);
+  showBadgeWithEnvironmentalData(staticInfo, detectedData);
 });
 
 // Re-run detection when page content changes (for SPAs)

@@ -1,0 +1,91 @@
+name: Report Missing Data
+description: Report missing AI detection, incorrect green hosting, or unusual environmental impact
+title: "[Missing Data] "
+labels: ["data", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve GreenScore! 🌱
+        
+        **Note:** GreenScore automatically calculates most environmental data. Only report cases where our detection is missing or incorrect.
+
+  - type: input
+    id: website_url
+    attributes:
+      label: Website URL
+      description: Full URL where the issue occurs
+      placeholder: "https://example.com/page"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: What type of data is missing or incorrect?
+      options:
+        - "AI model not detected"
+        - "Wrong AI model identified"
+        - "Incorrect green hosting status"
+        - "Unusual environmental impact"
+        - "Other"
+    validations:
+      required: true
+
+  - type: input
+    id: ai_model
+    attributes:
+      label: AI Model (if applicable)
+      description: What AI model is actually being used?
+      placeholder: "e.g., GPT-4, Claude, Gemini, GitHub Copilot"
+
+  - type: dropdown
+    id: ai_type
+    attributes:
+      label: AI Service Type (if applicable)
+      options:
+        - "Primary AI service (like ChatGPT, Claude)"
+        - "AI features in existing platform (like GitHub Copilot)"
+        - "AI-powered content generation"
+        - "Other AI functionality"
+
+  - type: dropdown
+    id: green_hosting
+    attributes:
+      label: Green Hosting Status (if applicable)
+      description: Does this website actually use renewable energy?
+      options:
+        - "Uses renewable energy (but shows as standard)"
+        - "Uses standard energy (but shows as green)"
+        - "Unknown"
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence/Source
+      description: How do you know this information? (links, documentation, etc.)
+      placeholder: "e.g., Company blog post about using GPT-4, sustainability report showing renewable energy use"
+
+  - type: textarea
+    id: current_behavior
+    attributes:
+      label: What GreenScore currently shows
+      description: What does the extension currently display for this site?
+      placeholder: "e.g., Shows 'No AI processing detected' but site clearly uses ChatGPT"
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: What should GreenScore show instead?
+      description: What would be the correct information?
+      placeholder: "e.g., Should detect GPT-4 with high environmental impact"
+
+  - type: checkboxes
+    id: verification
+    attributes:
+      label: Verification
+      options:
+        - label: "I have verified this information is accurate"
+          required: true
+        - label: "I have checked that this isn't already reported in existing issues"
+          required: true
