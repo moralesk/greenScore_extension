@@ -1,0 +1,1 @@
+💡 Want to suggest a new model or update existing info? [Open a new contribution issue here](https://github.com/moralesk/greenScore_extension/issues/new?template=add_model.yml)
